@@ -1,10 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Shitbucket",
-  "version": "1.0.2",
-  "description": "This plugin does absolutely nothing except turn the Bitbucket logo into a shitbucket.",
+  "version": "1.0.0",
+  "description": "Turns Bitbucket into Shitbucket by swapping the boring logo for a gloriously unprofessional turd.",
   "icons": {
-    "48": "icons/bb-favicon.png"
+    "16": "icons/bb-favicon.png",
+    "32": "icons/bb-favicon.png",
+    "48": "icons/bb-favicon.png",
+    "128": "icons/bb-favicon.png"
   },
   "content_scripts": [
     {
