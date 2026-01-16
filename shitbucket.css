@@ -1,22 +1,30 @@
 .newLogoText {
-    font-size: 20px;
+  font-size: 20px;
 }
 
 .regular-text-color {
-    color: #253858;
+  color: #253858;
 }
 
 .rainbow-text-color {
-    color: white;
+  color: #fff;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
 }
 
 .newLogoImage {
-    width: 16px;
-    height: 20px;
-    margin-right: 2px;
+  width: 50px;
+  margin: -15px 3px -15px -24px;
+  aspect-ratio: 32 / 29;
+  height: initial;
 }
 
 [data-testid="product-home-container"] {
-    text-decoration: none !important;
+  text-decoration: none !important;
+  margin-left: 19px;
 }
 
+[data-testid="product-home-logo"] {
+  text-decoration: none !important;
+  margin-left: 19px;
+}
