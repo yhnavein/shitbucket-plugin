@@ -17,6 +17,7 @@
   margin: -15px 3px -15px -24px;
   aspect-ratio: 32 / 29;
   height: initial;
+  transition: transform 0.2s ease;
 }
 
 [data-testid="product-home-container"] {
@@ -27,4 +28,40 @@
 [data-testid="product-home-logo"] {
   text-decoration: none !important;
   margin-left: 19px;
+}
+
+#poobucket {
+  border-radius: 5px;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(
+    135deg,
+    #4a3728 16.66%,
+    #7d5a3c 16.66%,
+    33.33%,
+    #a0522d 33.33%,
+    50%,
+    #8b6f47 50%,
+    66.66%,
+    #6b4423 66.66%,
+    83.33%,
+    #5c4033 83.33%
+  );
+  background-size: 120% 120%;
+  background-position: 0% 0%;
+  transition: background-position 0.3s ease;
+}
+
+#poobucket:hover {
+  background-position: 20% 20%;
+}
+
+#poobucket:hover .newLogoImage {
+  transform: scale(1.05) rotate(5deg);
+}
+
+#poobucket:active .newLogoImage {
+  transform: scale(0.95) rotate(-5deg);
 }

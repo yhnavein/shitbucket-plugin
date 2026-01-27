@@ -25,7 +25,8 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "icons/bb-favicon.png"
+        "icons/bb-favicon.png",
+        "icons/poo.png"
       ],
       "matches": [
         "*://*.bitbucket.org/*"
