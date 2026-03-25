@@ -65,3 +65,28 @@
 #poobucket:active .newLogoImage {
   transform: scale(0.95) rotate(-5deg);
 }
+
+.shitbucket-my-pr-avatar-link {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+.shitbucket-my-pr-avatar-link:hover {
+  opacity: 1;
+}
+
+.shitbucket-my-pr-avatar-image {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  object-fit: cover;
+}

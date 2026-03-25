@@ -6,6 +6,129 @@ if (typeof browser === "undefined") {
 
 const faviconPath = browser.runtime.getURL("icons/bb-favicon.png");
 const pooPath = browser.runtime.getURL("icons/poo.png");
+let isUpdatingMyPrAvatarLink = false;
+let isEnhancementUpdateQueued = false;
+
+const getCurrentUser = () => {
+  const bootstrapMeta = document.querySelector("meta#bb-bootstrap[data-current-user]");
+  if (!bootstrapMeta) {
+    return null;
+  }
+
+  const currentUserRaw = bootstrapMeta.getAttribute("data-current-user");
+  if (!currentUserRaw) {
+    return null;
+  }
+
+  try {
+    const user = JSON.parse(currentUserRaw);
+    return {
+      uuid: user.uuid,
+      avatarUrl: user.avatarUrl || user.avatarUrl2x || null
+    };
+  } catch {
+    return null;
+  }
+};
+
+const normalizeUuid = (uuid) => {
+  if (!uuid || typeof uuid !== "string") {
+    return null;
+  }
+
+  const trimmedUuid = uuid.trim();
+  if (!trimmedUuid) {
+    return null;
+  }
+
+  if (trimmedUuid.startsWith("{") && trimmedUuid.endsWith("}")) {
+    return trimmedUuid;
+  }
+
+  return `{${trimmedUuid}}`;
+};
+
+const getMyPullRequestsUrl = (pullRequestsLinkHref, userUuid) => {
+  if (!pullRequestsLinkHref || !userUuid) {
+    return null;
+  }
+
+  const baseUrl = new URL(pullRequestsLinkHref, window.location.origin);
+  if (baseUrl.pathname.includes("/workspace/pull-requests/")) {
+    return null;
+  }
+
+  baseUrl.searchParams.set("user_filter", "ALL");
+  baseUrl.searchParams.set("author", userUuid);
+  return `${baseUrl.pathname}${baseUrl.search}`;
+};
+
+const ensureMyPullRequestsAvatarLink = () => {
+  if (isUpdatingMyPrAvatarLink) {
+    return;
+  }
+
+  const sideNav = document.querySelector("[data-testid='global-side-nav-test-id']");
+  if (!sideNav) {
+    return;
+  }
+
+  const user = getCurrentUser();
+  const normalizedUuid = normalizeUuid(user?.uuid);
+  if (!normalizedUuid || !user?.avatarUrl) {
+    return;
+  }
+
+  isUpdatingMyPrAvatarLink = true;
+
+  try {
+    const pullRequestsLinks = Array.from(sideNav.querySelectorAll("a[href*='/pull-requests/']"));
+    for (const pullRequestsLink of pullRequestsLinks) {
+      const myPullRequestsUrl = getMyPullRequestsUrl(pullRequestsLink.getAttribute("href"), normalizedUuid);
+      if (!myPullRequestsUrl) {
+        continue;
+      }
+
+      const rowContainer = pullRequestsLink.parentElement;
+      if (!rowContainer) {
+        continue;
+      }
+
+      rowContainer.style.position = "relative";
+
+      let avatarLink = rowContainer.querySelector(".shitbucket-my-pr-avatar-link");
+      if (!avatarLink) {
+        avatarLink = document.createElement("a");
+        avatarLink.className = "shitbucket-my-pr-avatar-link";
+        avatarLink.target = "_self";
+        avatarLink.rel = "noopener noreferrer";
+        avatarLink.draggable = false;
+        avatarLink.setAttribute("aria-label", "My pull requests");
+
+        const avatarImage = document.createElement("img");
+        avatarImage.className = "shitbucket-my-pr-avatar-image";
+        avatarImage.alt = "My pull requests";
+        avatarImage.loading = "lazy";
+        avatarImage.decoding = "async";
+        avatarImage.referrerPolicy = "no-referrer";
+        avatarLink.appendChild(avatarImage);
+
+        rowContainer.appendChild(avatarLink);
+      }
+
+      if (avatarLink.getAttribute("href") !== myPullRequestsUrl) {
+        avatarLink.setAttribute("href", myPullRequestsUrl);
+      }
+
+      const avatarImage = avatarLink.querySelector("img");
+      if (avatarImage && avatarImage.getAttribute("src") !== user.avatarUrl) {
+        avatarImage.setAttribute("src", user.avatarUrl);
+      }
+    }
+  } finally {
+    isUpdatingMyPrAvatarLink = false;
+  }
+};
 
 // Function to update favicon
 const updateFavicon = () => {
@@ -46,11 +169,13 @@ faviconObserver.observe(document.head, {
   attributeFilter: ['href']
 });
 
-const targetNode = document.getElementById("root");
+const targetNode = document.getElementById("root") || document.body || document.documentElement;
 
-const config = { attributes: true, childList: true, subtree: true };
+const config = { childList: true, subtree: true };
 
-const callback = (_mutationList, _observer) => {
+const applyEnhancements = () => {
+  ensureMyPullRequestsAvatarLink();
+
   const container = document.querySelector("[data-testid='product-home-container']");
 
   if (!container) {
@@ -79,6 +204,22 @@ const callback = (_mutationList, _observer) => {
   }
 };
 
-const observer = new MutationObserver(callback);
+const scheduleEnhancementsUpdate = () => {
+  if (isEnhancementUpdateQueued) {
+    return;
+  }
 
-observer.observe(targetNode, config);
+  isEnhancementUpdateQueued = true;
+  window.requestAnimationFrame(() => {
+    isEnhancementUpdateQueued = false;
+    applyEnhancements();
+  });
+};
+
+scheduleEnhancementsUpdate();
+
+const observer = new MutationObserver(scheduleEnhancementsUpdate);
+
+if (targetNode) {
+  observer.observe(targetNode, config);
+}
